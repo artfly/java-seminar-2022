@@ -1,6 +1,11 @@
 package com.github.artfly.simplifier;
 
 
+import com.github.artfly.simplifier.error.ConsoleReporter;
+import com.github.artfly.simplifier.error.ErrorReporter;
+import com.github.artfly.simplifier.lexer.Lexer;
+import com.github.artfly.simplifier.lexer.Token;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -22,8 +27,9 @@ public class Main {
         System.out.println((char) reader.read());
         BufferedReader br = new BufferedReader(reader);
         System.out.println(br.readLine());
-        Lexer lexer = new Lexer(br);
-        List<Token> tokens = lexer.scan();
+        ErrorReporter reporter = new ConsoleReporter();
+        List<Token> tokens = Lexer.scan(br, reporter);
+        if (tokens == null) return;
         System.out.println(tokens);
     }
 }

@@ -1,4 +1,4 @@
-package com.github.artfly.simplifier;
+package com.github.artfly.simplifier.lexer;
 
 public enum TokenType {
     NUMBER,
