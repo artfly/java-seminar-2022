@@ -6,118 +6,57 @@ import com.github.artfly.simplifier.lexer.*;
 
 import java.util.*;
 
-/*
-
-2 * 3 + 4
-
-     +
-   /  \
-  *   4
- /\
-2 3
-
-expr := binary | unary
-binary := expr '+' expr | expr '*' expr
-unary := NUMBER
-
-2 * 3 + 4
-
-expr -> binary -> expr '+' expr -> (binary) '+' unary -> (expr '*' expr) '+' unary ->
--> (unary '*' unary) '+' unary
-
-     +
-   /  \
-  *   4
- /\
-2 3
-
-expr -> binary -> (expr) '*' (expr) -> unary '*' (expr '+' expr) ->
--> unary '*' (unary '+' unary)
-
-       *
-      / \
-     2  +
-       /\
-      3  4
-
-1) precedence
-2) associativity
-
-a = b = c
-a + b + c
-
-expr := binary | unary
-binary := expr '+' expr | expr '*' expr
-unary := NUMBER
-
-
-2 + 3
-2
-
-2 * 3 + 4
-
-expr := term
-term := factor '+' term | factor
-factor := primary | primary '*' factor
-primary := NUMBER
-
-2 * 3 + 4
-
-term -> factor '+' term -> (primary '*' factor) '+' primary ->
-(primary '*' primary) + primary
-
-+ - / * ^ () -1
-
-low -> high
-1) + -
-2) * /
-3) ^
-4) -1
-5) ()
-
-expr := term
-term := factor '+' term | factor
-factor := primary | primary '*' factor
-primary := NUMBER
-
-expr := term
-term := factor ('+' | '-') term | factor
-factor := power ('*' | '/') factor | power
-power := unary '^' unary | unary
-unary := primary | '-' unary
-primary := VAR | NUMBER | '(' expr ')'
- */
 public class Parser {
-    
+
     private final List<Token> tokens;
     private final ErrorReporter errorReporter;
     private int pos;
 
-    public Parser(List<Token> tokens, ErrorReporter errorReporter) {
+    private Parser(List<Token> tokens, ErrorReporter errorReporter) {
         this.tokens = tokens;
         this.errorReporter = errorReporter;
     }
-    
+
     public static List<Expr> parse(List<Token> tokens, ErrorReporter errorReporter) {
         Parser parser = new Parser(tokens, errorReporter);
         return parser.parse();
     }
-    
+
+    private static String unexpectedToken(Token token, TokenType... expected) {
+        int pos = token.pos();
+        String position = pos == -1 ? 
+                "End of line " + token.nLine() :
+                "Line " + token.nLine() + ", position: " + pos;
+        return """
+                %s
+                Expected tokens: %s,
+                Actual: %s
+                """.formatted(position, Arrays.toString(expected), token.tokenType());
+    }
+
     private List<Expr> parse() {
+        boolean hasErrors = false;
         List<Expr> expressions = new ArrayList<>();
         while (!matches(TokenType.EOF)) {
-            Expr expr = parseExpr();
-            expressions.add(expr);
-            advance(TokenType.EOL);
+            try {
+                Expr expr = parseExpr();
+                expressions.add(expr);
+                consume(TokenType.EOL);
+            } catch (ParserException e) {
+                hasErrors = true;
+                if (!errorReporter.report(e.getMessage())) {
+                    return null;
+                }
+            }
         }
-        return expressions;
+        return hasErrors ? null : expressions;
     }
-    
+
     // expr := term
     private Expr parseExpr() {
         return parseTerm();
     }
-    
+
     // term := factor ('+' | '-') term | factor
     // 2 + 3 + 4
     private Expr parseTerm() {
@@ -129,26 +68,6 @@ public class Parser {
             return new Expr.Binary(expr, rhs, op);
         }
         return expr;
-    }
-
-    private boolean matches(TokenType... expected) {
-        if (expected.length == 0) return true;
-        Token token = tokens.get(pos);
-        TokenType actual = token.tokenType();
-        for (TokenType t : expected) {
-            if (actual == t) return true;
-        }
-        return false;
-    }
-
-    private Token advance(TokenType... expected) {
-        if (!matches(expected)) {
-            // TODO
-            throw new IllegalStateException("Actual token: " + tokens.get(pos).tokenType());
-        }
-        Token token = tokens.get(pos);
-        if (token.tokenType() != TokenType.EOF) pos++;
-        return token;
     }
 
     // factor := power ('*' | '/') factor | power
@@ -163,7 +82,6 @@ public class Parser {
         return expr;
     }
 
-    // TODO
     // power := unary '^' power | unary
     private Expr parsePower() {
         Expr expr = parseUnary();
@@ -174,7 +92,7 @@ public class Parser {
         }
         return expr;
     }
-    
+
     // unary := primary | '-' unary := ('-')* primary
     private Expr parseUnary() {
         boolean isNegated = false;
@@ -186,13 +104,13 @@ public class Parser {
         if (!isNegated) return expr;
         return new Expr.Negated(expr);
     }
-    
+
     // primary := VAR | NUMBER | '(' expr ')'
     private Expr parsePrimary() {
         if (matches(TokenType.OP_BRACE)) {
             advance();
             Expr expr = parseExpr();
-            advance(TokenType.CL_BRACE);
+            consume(TokenType.CL_BRACE);
             return expr;
         }
         if (matches(TokenType.NUMBER)) {
@@ -203,7 +121,30 @@ public class Parser {
             Token token = advance();
             return new Expr.Var((String) token.value());
         }
-        advance(TokenType.CL_BRACE, TokenType.IDENTIFIER, TokenType.NUMBER);
-        throw new IllegalStateException("Should not reach");
+        String message = unexpectedToken(advance(), TokenType.OP_BRACE, TokenType.IDENTIFIER, TokenType.NUMBER);
+        throw new ParserException(message);
+    }
+
+    private boolean matches(TokenType first, TokenType... rest) {
+        Token token = tokens.get(pos);
+        TokenType actual = token.tokenType();
+        if (actual == first) return true;
+        for (TokenType expected : rest) {
+            if (actual == expected) return true;
+        }
+        return false;
+    }
+
+    private Token advance() {
+        Token token = tokens.get(pos);
+        if (token.tokenType() != TokenType.EOF) pos++;
+        return token;
+    }
+
+    private void consume(TokenType expected) {
+        Token token = advance();
+        if (token.tokenType() != expected) {
+            throw new ParserException(unexpectedToken(token, expected));
+        }
     }
 }

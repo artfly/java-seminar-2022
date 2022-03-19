@@ -23,6 +23,8 @@ public class Main {
                 10 / a
                 (3 + 3 * 3)
                 ((12))
+                -2^2
+                
                 """;
         BufferedReader br = new BufferedReader(new StringReader(expressions));
         ErrorReporter reporter = new ConsoleReporter();
@@ -30,6 +32,7 @@ public class Main {
         System.out.println(tokens);
         if (tokens == null) return;
         List<Expr> expr = Parser.parse(tokens, reporter);
+        if (expr == null) return;
         expr.forEach(System.out::println);
     }
 }
