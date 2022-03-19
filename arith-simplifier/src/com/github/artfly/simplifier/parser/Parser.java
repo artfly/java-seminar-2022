@@ -70,9 +70,9 @@ public class Parser {
         return expr;
     }
 
-    // factor := power ('*' | '/') factor | power
+    // factor := unary ('*' | '/') factor | unary
     private Expr parseFactor() {
-        Expr expr = parsePower();
+        Expr expr = parseUnary();
         if (matches(TokenType.MULTIPLY, TokenType.DIVIDE)) {
             Token token = advance();
             Operator op = token.tokenType() == TokenType.MULTIPLY ? Operator.MULTIPLY : Operator.DIVIDE;
@@ -82,27 +82,27 @@ public class Parser {
         return expr;
     }
 
-    // power := unary '^' power | unary
-    private Expr parsePower() {
-        Expr expr = parseUnary();
-        if (matches(TokenType.POW)) {
-            advance();
-            Expr rhs = parsePower();
-            return new Expr.Binary(expr, rhs, Operator.POWER);
-        }
-        return expr;
-    }
-
-    // unary := primary | '-' unary := ('-')* primary
+    // unary := ('-')* power
     private Expr parseUnary() {
         boolean isNegated = false;
         while (matches(TokenType.MINUS)) {
             isNegated = !isNegated;
             advance();
         }
-        Expr expr = parsePrimary();
+        Expr expr = parsePower();
         if (!isNegated) return expr;
         return new Expr.Negated(expr);
+    }
+
+    // power := primary '^' power | primary
+    private Expr parsePower() {
+        Expr expr = parsePrimary();
+        if (matches(TokenType.POW)) {
+            advance();
+            Expr rhs = parsePower();
+            return new Expr.Binary(expr, rhs, Operator.POWER);
+        }
+        return expr;
     }
 
     // primary := VAR | NUMBER | '(' expr ')'
