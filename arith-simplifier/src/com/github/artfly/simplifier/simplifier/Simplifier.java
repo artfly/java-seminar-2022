@@ -4,10 +4,10 @@ import com.github.artfly.simplifier.parser.*;
 
 public interface Simplifier {
 
-    Simplifier[] SIMPLIFIERS = {}; 
+    Simplifier[] SIMPLIFIERS = { new AdditiveConstantFolder() }; 
     Expr simplify(Expr expr);
     
-    default Expr doSimplify(Expr expr) {
+    static Expr doSimplify(Expr expr) {
         for (Simplifier simplifier : SIMPLIFIERS) {
             expr = simplifier.simplify(expr);
         }
