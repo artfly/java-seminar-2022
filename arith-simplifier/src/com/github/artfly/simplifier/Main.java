@@ -5,6 +5,7 @@ import com.github.artfly.simplifier.error.ConsoleReporter;
 import com.github.artfly.simplifier.error.ErrorReporter;
 import com.github.artfly.simplifier.lexer.Lexer;
 import com.github.artfly.simplifier.lexer.Token;
+import com.github.artfly.simplifier.parser.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,21 +16,20 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) throws IOException {
         String expressions = """
-                12 + 34 -> 46
-                10 + -12 -> -2
-                a + a -> 2 * a
-                (ab3c + -a + b + a)^32 -> (abc + b)^2 -> abc^2 + 2 * a * b + b^2
-                10 / a -> 10 / a
-                (3 + 3 * 3)#!!!!
-                ((12)) -> 12
+                12 + 34
+                10 + -12
+                a + a
+                (ab3c + -a + b + a)^32
+                10 / a
+                (3 + 3 * 3)
+                ((12))
                 """;
-        Reader reader = new StringReader(expressions);
-        System.out.println((char) reader.read());
-        BufferedReader br = new BufferedReader(reader);
-        System.out.println(br.readLine());
+        BufferedReader br = new BufferedReader(new StringReader(expressions));
         ErrorReporter reporter = new ConsoleReporter();
         List<Token> tokens = Lexer.scan(br, reporter);
-        if (tokens == null) return;
         System.out.println(tokens);
+        if (tokens == null) return;
+        List<Expr> expr = Parser.parse(tokens, reporter);
+        expr.forEach(System.out::println);
     }
 }
