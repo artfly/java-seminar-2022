@@ -16,22 +16,26 @@ import java.util.stream.Collectors;
 public class Main {
     public static void main(String[] args) {
         String exprText = """
-                12 + 34
-                10 + -12
-                a + a
-                (ab3c + -a + b + a)^32
-                10 / a
-                (3 + 3 * 3)
-                ((12))
-                -2^2
-                -(2 + 2)^2
-                (4 + b + a + 1)   +      3 * (5 + 2)
-                2
-                2 + 2
-                2 * 2 + 2
-                2 * 2 + 2 * 2
-                (2 + 2 * 2) + (2 * 2 + 2)
-                (a + 2 + b + 2) + (b + 2 + 2 + 2)
+                (x^2+y^2)^2
+                x^3 + (x+y)^2
+                (-3)^2
+                -3^2
+                (-x)^2
+                (-x-y)^2
+                2^12 + 1               
+                (x+y+z)^2
+                -(2)^3
+                (x+y)^2+(2*x+2*x)^2
+                (3*x)^2
+                (2*x+3*y)^2
+                (x+y)^2
+                (x+y)^3
+                (x+y+z)^4
+                (x-y)^2
+                2^4
+                (2^2)^2
+                (x+10)^2
+                (x-y-z)^2
                 """;
         BufferedReader br = new BufferedReader(new StringReader(exprText));
         ErrorReporter reporter = new ConsoleReporter();
