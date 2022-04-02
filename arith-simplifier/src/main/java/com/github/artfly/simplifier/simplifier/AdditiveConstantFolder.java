@@ -1,6 +1,7 @@
 package com.github.artfly.simplifier.simplifier;
 
-import com.github.artfly.simplifier.parser.*;
+import com.github.artfly.simplifier.parser.Expr;
+import com.github.artfly.simplifier.parser.Operator;
 
 public class AdditiveConstantFolder implements Simplifier {
 

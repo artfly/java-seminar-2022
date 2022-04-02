@@ -6,7 +6,7 @@ import com.github.artfly.simplifier.error.ErrorReporter;
 import com.github.artfly.simplifier.lexer.Lexer;
 import com.github.artfly.simplifier.lexer.Token;
 import com.github.artfly.simplifier.parser.*;
-import com.github.artfly.simplifier.simplifier.*;
+import com.github.artfly.simplifier.simplifier.Simplifier;
 
 import java.io.BufferedReader;
 import java.io.StringReader;

@@ -4,7 +4,9 @@ package com.github.artfly.simplifier.parser;
 import com.github.artfly.simplifier.error.*;
 import com.github.artfly.simplifier.lexer.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Parser {
 

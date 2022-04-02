@@ -1,6 +1,6 @@
 package com.github.artfly.simplifier.simplifier;
 
-import com.github.artfly.simplifier.parser.*;
+import com.github.artfly.simplifier.parser.Expr;
 
 public interface Simplifier {
 
