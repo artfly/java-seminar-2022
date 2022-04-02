@@ -4,7 +4,7 @@ import com.github.artfly.simplifier.parser.Expr;
 
 public interface Simplifier {
 
-    Simplifier[] SIMPLIFIERS = { new AdditiveConstantFolder() }; 
+    Simplifier[] SIMPLIFIERS = { new NegationToNumberSimplifier(), new AdditiveConstantFolder() };
     Expr simplify(Expr expr);
     
     static Expr doSimplify(Expr expr) {
