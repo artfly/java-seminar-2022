@@ -11,6 +11,7 @@ import com.github.artfly.simplifier.simplifier.Simplifier;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -34,14 +35,16 @@ public class Main {
                 """;
         BufferedReader br = new BufferedReader(new StringReader(exprText));
         ErrorReporter reporter = new ConsoleReporter();
-        List<Token> tokens = Lexer.scan(br, reporter);
-        System.out.println(tokens);
-        if (tokens == null) return;
-        List<Expr> expressions = Parser.parse(tokens, reporter);
+        List<Expr> expressions = simplify(br, reporter);
         if (expressions == null) return;
-        System.out.println("Before:");
-        expressions.forEach(System.out::println);
-        System.out.println("After:");
         expressions.stream().map(Simplifier::doSimplify).forEach(System.out::println);
+    }
+
+    public static List<Expr> simplify(BufferedReader br, ErrorReporter reporter) {
+        List<Token> tokens = Lexer.scan(br, reporter);
+        if (tokens == null) return null;
+        List<Expr> expressions = Parser.parse(tokens, reporter);
+        if (expressions == null) return null;
+        return expressions.stream().map(Simplifier::doSimplify).collect(Collectors.toList());
     }
 }

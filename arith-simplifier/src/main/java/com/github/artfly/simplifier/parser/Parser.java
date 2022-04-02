@@ -41,8 +41,10 @@ public class Parser {
         List<Expr> expressions = new ArrayList<>();
         while (!matches(TokenType.EOF)) {
             try {
-                Expr expr = parseExpr();
-                expressions.add(expr);
+                if (!matches(TokenType.EOL)) {
+                    Expr expr = parseExpr();
+                    expressions.add(expr);
+                }
                 consume(TokenType.EOL);
             } catch (ParserException e) {
                 hasErrors = true;
