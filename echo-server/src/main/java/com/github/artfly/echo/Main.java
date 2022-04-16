@@ -1,7 +1,13 @@
+package com.github.artfly.echo;
+
+import org.slf4j.*;
+
 import java.io.*;
 import java.net.*;
 
 public class Main {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
         blocking();
@@ -10,10 +16,10 @@ public class Main {
     private static void blocking() throws IOException {
         try (ServerSocket socket = new ServerSocket()) {
             socket.bind(new InetSocketAddress("localhost", 8080));
-            System.out.println("Server started...");
+            LOG.debug("Server started...");
             while (true) {
                 Socket client = socket.accept();
-                System.out.println("New client!");
+                LOG.debug("New client!");
                 Thread thread = new Thread(new ClientHandler(client));
                 thread.start();
             }
@@ -23,10 +29,10 @@ public class Main {
     private static void sequential() throws IOException {
         try (ServerSocket socket = new ServerSocket()) {
             socket.bind(new InetSocketAddress("localhost", 8080));
-            System.out.println("Server started...");
+            LOG.debug("Server started...");
             while (true) {
                 try (Socket client = socket.accept()) {
-                    System.out.println("New client!");
+                    LOG.debug("New client!");
                     BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
                     System.err.println(reader.readLine());
                 }
@@ -46,7 +52,7 @@ public class Main {
         public void run() {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                System.err.println(reader.readLine());
+                LOG.info(reader.readLine());
                 client.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);

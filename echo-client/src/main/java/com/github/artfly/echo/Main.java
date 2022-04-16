@@ -1,8 +1,15 @@
+package com.github.artfly.echo;
+
+import org.slf4j.*;
+import org.slf4j.Logger;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class Main {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws InterruptedException {
         List<Thread> threads = new ArrayList<>();
@@ -31,7 +38,7 @@ public class Main {
 //                Thread.sleep((1_000 - id) * 1000L);
                 OutputStream os = socket.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-                System.out.println("Client " + id + " sends message...");
+                LOG.debug("Client " + id + " sends message...");
                 writer.write("Client id: " + id);
                 writer.flush();
             } catch (IOException e) {
