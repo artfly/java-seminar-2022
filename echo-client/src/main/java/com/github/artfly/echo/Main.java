@@ -9,8 +9,6 @@ import java.util.*;
 
 public class Main {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
-
     public static void main(String[] args) throws InterruptedException {
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 1_000; i++) {
@@ -22,9 +20,11 @@ public class Main {
             thread.join();
         }
     }
-    
-    static class Client implements Runnable {
-        
+
+    private static class Client implements Runnable {
+
+        private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+
         private final int id;
 
         Client(int id) {
@@ -34,17 +34,17 @@ public class Main {
         @Override
         public void run() {
             try (Socket socket = new Socket()) {
+                LOG.debug("Client {} connects to server...", id);
                 socket.connect(new InetSocketAddress("localhost", 8080));
-//                Thread.sleep((1_000 - id) * 1000L);
-                OutputStream os = socket.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-                LOG.debug("Client " + id + " sends message...");
+                Writer writer = new OutputStreamWriter(socket.getOutputStream());
+                LOG.debug("Client {} sends message...", id);
                 writer.write("Client id: " + id);
                 writer.flush();
+                LOG.info("Client {} sent message (port {})", id, socket.getLocalPort());
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
     }
-    
+
 }
