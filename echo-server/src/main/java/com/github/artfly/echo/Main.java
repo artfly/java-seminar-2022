@@ -13,6 +13,15 @@ public class Main {
         blocking();
     }
 
+    
+    /*
+    1. client connected (0 ms)
+    2. new client connected (100 ms)
+    3. first client writes data (200 ms)
+    ----------
+    slow os call - slow accept
+    context switches - slow input handling, extra work
+    */
     private static void blocking() throws IOException {
         try (ServerSocket socket = new ServerSocket()) {
             socket.bind(new InetSocketAddress("localhost", 8080));

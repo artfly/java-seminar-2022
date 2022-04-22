@@ -9,12 +9,16 @@ import java.util.*;
 
 public class Main {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Client.class);
+
     public static void main(String[] args) throws InterruptedException {
+        LOG.debug("Client started...");
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 1_000; i++) {
             Thread thread = new Thread(new Client(i));
             thread.start();
             threads.add(thread);
+            Thread.sleep(100);
         }
         for (Thread thread : threads) {
             thread.join();
@@ -36,13 +40,14 @@ public class Main {
             try (Socket socket = new Socket()) {
                 LOG.debug("Client {} connects to server...", id);
                 socket.connect(new InetSocketAddress("localhost", 8080));
+                Thread.sleep(200);
                 Writer writer = new OutputStreamWriter(socket.getOutputStream());
                 LOG.debug("Client {} sends message...", id);
                 writer.write("Client id: " + id);
                 writer.flush();
                 LOG.info("Client {} sent message (port {})", id, socket.getLocalPort());
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }
