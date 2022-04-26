@@ -15,8 +15,17 @@ public class ExponentiationPolynomial implements Simplifier{
         return result;
     }
 
+    private int truncatedFactorial(int k, int n){
+        int result = 1;
+        for (int i = k + 1; i < n; i++){
+            result *= i;
+        }
+        return result;
+    }
+
     int getBinomialCoefficient(int k, int n){
-        return factorial(n) / (factorial(n - k) * factorial(k));
+        if (k > (n - k)) return truncatedFactorial(k, n) / factorial(n - k);
+        return truncatedFactorial(n - k, n) / factorial(k);
     }
 
     private Expr exponentiation(Expr expr){
@@ -47,11 +56,11 @@ public class ExponentiationPolynomial implements Simplifier{
                         if (n2.value() == 1) yield n1;
                         yield new Expr.Binary(n1, n2, Operator.POWER);
                     }
-                    if (b.lhs() instanceof Expr.Binary bin) {
-                        if (bin.op() == Operator.PLUS || bin.op() == Operator.MINUS) yield createBinomialSeries(bin, n2);
-                        yield new Expr.Binary(exponentiation(getExprInDegree(bin.lhs(), n2.value())),
-                                exponentiation(getExprInDegree(bin.rhs(), n2.value())),
-                                bin.op());
+                    if (b.lhs() instanceof Expr.Binary lhsBin) {
+                        if (lhsBin.op() == Operator.PLUS || lhsBin.op() == Operator.MINUS) yield createBinomialSeries(lhsBin, n2);
+                        yield new Expr.Binary(exponentiation(getExprInDegree(lhsBin.lhs(), n2.value())),
+                                exponentiation(getExprInDegree(lhsBin.rhs(), n2.value())),
+                                lhsBin.op());
                     }
                 }
                 yield expr;
