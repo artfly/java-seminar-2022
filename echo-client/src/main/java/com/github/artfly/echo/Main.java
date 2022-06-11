@@ -15,6 +15,7 @@ public class Main {
         LOG.debug("Client started...");
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 1_000; i++) {
+            Thread.sleep(200);
             Thread thread = new Thread(new Client(i));
             thread.start();
             threads.add(thread);
